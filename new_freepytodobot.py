@@ -48,20 +48,23 @@ def random(message):
 def add(message):
     _, date, tail = message.text.split(maxsplit=2)
     task = ' '.join([tail])
+    if len(task) < 3:
+        bot.send_message(message.chat.id, 'Задачи должны быть больше 3х символов')
     add_todo(date, task)
     bot.send_message(message.chat.id, f'Задача {task} добавлена на дату {date}')
 
 
 @bot.message_handler(commands=['show', 'print'])
 def print_(message):
-    date = message.text.split()[1].lower()
-    if date in todos:
-        tasks = ''
-        for task in todos[date]:
-            tasks += f'[ ] {task}\n'
-    else:
-        tasks = 'Такой даты нет'
-    bot.send_message(message.chat.id, tasks)
+    dates = message.text.split(maxsplit=1)[1].lower().split()
+    response  = ''
+    for date in dates:
+        tasks = todos.get(date)
+        response += f'{date}: \n'
+        for task in tasks:
+            response += f'[ ] {task}\n'
+        response += '\n'
+    bot.send_message(message.chat.id, response)
 
 
 bot.polling(none_stop=True)
